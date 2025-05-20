@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSyncContacts: FloatingActionButton
     private lateinit var btnAddContacts: FloatingActionButton
     val EDIT_CONTACT_REQUEST_CODE = 100
+    private val ADD_CONTACT_REQUEST_CODE = 102
     private var contactList = mutableListOf<Contact>()
     private val PERMISSIONS_REQUEST_READ_CONTACTS = 101
     private val mainScope = MainScope()
@@ -60,7 +61,8 @@ class MainActivity : AppCompatActivity() {
 
         btnAddContacts.setOnClickListener {
             val intent = Intent(this, AddActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, ADD_CONTACT_REQUEST_CODE)
+
 
         }
 
@@ -115,6 +117,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == EDIT_CONTACT_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             val updatedUserId = data.getIntExtra("userId", -1)
             val updatedFullName = data.getStringExtra("fullName") ?: ""
@@ -131,6 +134,10 @@ class MainActivity : AppCompatActivity() {
                 contactList[index] = updatedContact
                 contactAdapter.notifyItemChanged(index)
             }
+        }
+
+        if (requestCode == ADD_CONTACT_REQUEST_CODE && resultCode == RESULT_OK) {
+            loadContacts()
         }
     }
 

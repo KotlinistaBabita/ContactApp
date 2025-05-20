@@ -53,30 +53,45 @@ class AddActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val contact = AddContact(
-                firstName = firstName,
-                surname = surname,
-                company = company,
-                phone = phone,
-                imageUri = selectedImageUri?.toString(),
-            )
-            val contactToSync = Contact( contactId = 0L,
-                name = "$firstName $surname".trim(),
-                phone = phone,
-                email = null,
-                company = company
-                )
-
-            ContactUtils.syncContactsToPhone(this, listOf(contactToSync))
-
-            val intent = Intent().apply {
-                putExtra("newContact", contact)
+            if (checkSelfPermission(android.Manifest.permission.WRITE_CONTACTS) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.WRITE_CONTACTS), 1001)
+                return@setOnClickListener
             }
 
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+            saveContact(firstName, surname, company, phone)
         }
     }
+
+
+
+    private fun saveContact(firstName: String, surname: String, company: String, phone: String) {
+        val contact = AddContact(
+            firstName = firstName,
+            surname = surname,
+            company = company,
+            phone = phone,
+            imageUri = selectedImageUri?.toString(),
+        )
+
+        val contactToSync = Contact(
+            contactId = 0L,
+            name = "$firstName $surname".trim(),
+            phone = phone,
+            email = null,
+            company = company
+        )
+
+        ContactUtils.syncContactsToPhone(this, listOf(contactToSync))
+
+        val intent = Intent().apply {
+            putExtra("newContact", contact)
+        }
+
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -84,8 +99,8 @@ class AddActivity : AppCompatActivity() {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
             selectedImageUri = data?.data
             image.setImageURI(selectedImageUri)
+            }
         }
-    }
 
 
 }
